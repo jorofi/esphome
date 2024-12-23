@@ -3,20 +3,22 @@
 #include "esphome/components/climate/climate_mode.h"
 #include "esphome/components/climate_ir/climate_ir.h"
 
-#define SAMSUNG_AIRCON1_HDR_MARK   3000
-#define SAMSUNG_AIRCON1_HDR_SPACE  9000
-#define SAMSUNG_AIRCON1_BIT_MARK   500
-#define SAMSUNG_AIRCON1_ONE_SPACE  1500
-#define SAMSUNG_AIRCON1_ZERO_SPACE 500
-#define SAMSUNG_AIRCON1_MSG_SPACE  2000
-#define GETBITS8(data, offset, size) \
-    (((data) & (((uint8_t)UINT8_MAX >> (8 - (size))) << (offset))) >> (offset))
 
 namespace esphome {
 namespace climate_ir_samsung {
 
+#define GETBITS8(data, offset, size) \
+    (((data) & (((uint8_t)UINT8_MAX >> (8 - (size))) << (offset))) >> (offset))
+
     static const char *const TAG = "samsung.climate";
     static const uint32_t SAMSUNG_IR_FREQUENCY = 38000;
+    static const int SAMSUNG_AIRCON1_HDR_MARK = 3000;
+    static const int SAMSUNG_AIRCON1_HDR_SPACE = 9000;
+    static const int SAMSUNG_AIRCON1_BIT_MARK = 500;
+    static const int SAMSUNG_AIRCON1_ONE_SPACE = 1500;
+    static const int SAMSUNG_AIRCON1_ZERO_SPACE = 500;
+    static const int SAMSUNG_AIRCON1_MSG_SPACE = 2000;
+
     const uint16_t kSamsungAcExtendedStateLength = 21;
     const uint16_t kSamsungAcSectionLength = 7;
 

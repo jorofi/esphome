@@ -19,13 +19,13 @@ namespace climate_ir_samsung {
         setTemp(this->target_temperature);
         setSwing(this->swing_mode);
         setFan(this->fan_mode.has_value() ? this->fan_mode.value() : climate::CLIMATE_FAN_AUTO);
-        
+
         send();
     }
 
     /// Send the current state of the climate object.
     void SamsungClimateIR::send() {
-        
+
         checksum();
 
         auto transmit = this->transmitter_->transmit();
@@ -139,7 +139,7 @@ namespace climate_ir_samsung {
             0x02, 0xB2, 0x0F, 0x00, 0x00, 0x00, 0xC0,
             0x01, 0xD2, 0x0F, 0x00, 0x00, 0x00, 0x00,
             0x01, 0x02, 0xFF, 0x71, 0x80, 0x11, 0xC0};
-            
+
         std::memcpy(protocol.raw, on ? kOn : kOff, kSamsungAcExtendedStateLength);
 
         send();
@@ -205,7 +205,7 @@ namespace climate_ir_samsung {
     /// @return The nr. of bits found of the given type found in the array.
     uint16_t SamsungClimateIR::countBits(const uint8_t * const start, const uint16_t length, const bool ones, const uint16_t init) {
         uint16_t count = init;
-        
+
         for (uint16_t offset = 0; offset < length; offset++)
             for (uint8_t currentbyte = *(start + offset); currentbyte; currentbyte >>= 1)
                 if (currentbyte & 1) count++;
@@ -225,7 +225,7 @@ namespace climate_ir_samsung {
     uint16_t SamsungClimateIR::countBits(const uint64_t data, const uint8_t length, const bool ones, const uint16_t init) {
         uint16_t count = init;
         uint8_t bitsSoFar = length;
-        
+
         for (uint64_t remainder = data; remainder && bitsSoFar; remainder >>= 1, bitsSoFar--)
             if (remainder & 1) count++;
 
