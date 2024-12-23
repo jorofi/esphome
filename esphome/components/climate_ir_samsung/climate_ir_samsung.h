@@ -26,7 +26,7 @@ namespace climate_ir_samsung {
     const uint8_t kSamsungAcMinTemp  = 16;  // C   Mask 0b11110000
     const uint8_t kSamsungAcMaxTemp  = 30;  // C   Mask 0b11110000
     const uint8_t kSamsungAcAutoTemp = 25;  // C   Mask 0b11110000
-    
+
     // Mode
     const uint8_t kSamsungAcAuto = 0;
     const uint8_t kSamsungAcCool = 1;
@@ -181,11 +181,11 @@ namespace climate_ir_samsung {
     };
 
     class SamsungClimateIR : public climate_ir::ClimateIR {
-        
+
         SamsungProtocol protocol;
         climate::ClimateMode current_climate_mode;
 
-        public: SamsungClimateIR() : 
+        public: SamsungClimateIR() :
             climate_ir::ClimateIR(
                 kSamsungAcMinTemp, kSamsungAcMaxTemp, 1.0f, true, true,
                 {climate::CLIMATE_FAN_AUTO, climate::CLIMATE_FAN_LOW, climate::CLIMATE_FAN_MEDIUM, climate::CLIMATE_FAN_HIGH},
@@ -193,14 +193,14 @@ namespace climate_ir_samsung {
 
         protected:
             void transmit_state() override;
-            
+
             void send();
             void setSwing(const climate::ClimateSwingMode swingMode);
             void setMode(const climate::ClimateMode mode);
             void setTemp(const uint8_t temp);
             void setAndSendPowerState(const bool on);
             void setFan(const climate::ClimateFanMode fanMode);
-            
+
             void checksum(void);
             static uint8_t calcSectionChecksum(const uint8_t *section);
             static uint16_t countBits(const uint8_t * const start, const uint16_t length, const bool ones = true, const uint16_t init = 0);
