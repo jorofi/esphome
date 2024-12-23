@@ -12,9 +12,6 @@
 #define GETBITS8(data, offset, size) \
     (((data) & (((uint8_t)UINT8_MAX >> (8 - (size))) << (offset))) >> (offset))
 
-uint16_t countBits(const uint8_t * const start, const uint16_t length, const bool ones = true, const uint16_t init = 0);
-uint16_t countBits(const uint64_t data, const uint8_t length, const bool ones = true, const uint16_t init = 0);
-
 namespace esphome {
 namespace climate_ir_samsung {
 
@@ -181,12 +178,12 @@ namespace climate_ir_samsung {
         };
     };
 
-    class SamsungClimate : public climate_ir::ClimateIR {
+    class SamsungClimateIR : public climate_ir::ClimateIR {
         
         SamsungProtocol protocol;
         climate::ClimateMode current_climate_mode;
 
-        public: SamsungClimate() : 
+        public: SamsungClimateIR() : 
             climate_ir::ClimateIR(
                 kSamsungAcMinTemp, kSamsungAcMaxTemp, 1.0f, true, true,
                 {climate::CLIMATE_FAN_AUTO, climate::CLIMATE_FAN_LOW, climate::CLIMATE_FAN_MEDIUM, climate::CLIMATE_FAN_HIGH},
@@ -204,5 +201,7 @@ namespace climate_ir_samsung {
             
             void checksum(void);
             static uint8_t calcSectionChecksum(const uint8_t *section);
+            static uint16_t countBits(const uint8_t * const start, const uint16_t length, const bool ones = true, const uint16_t init = 0);
+            static uint16_t countBits(const uint64_t data, const uint8_t length, const bool ones = true, const uint16_t init = 0);
     };
 }}

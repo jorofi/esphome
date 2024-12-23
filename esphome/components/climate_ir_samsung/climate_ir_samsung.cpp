@@ -1,44 +1,4 @@
 #include "climate_ir_samsung.h"
-#include <thread>
-#include <chrono>
-
-/// Count the number of bits of a certain type in an array.
-/// @param[in] start A ptr to the start of the byte array to calculate over.
-/// @param[in] length How many bytes to use in the calculation.
-/// @param[in] ones Count the binary nr of `1` bits. False is count the `0`s.
-/// @param[in] init Starting value of the calculation to use. (Default is 0)
-/// @return The nr. of bits found of the given type found in the array.
-uint16_t countBits(const uint8_t * const start, const uint16_t length, const bool ones, const uint16_t init) {
-    uint16_t count = init;
-    
-    for (uint16_t offset = 0; offset < length; offset++)
-        for (uint8_t currentbyte = *(start + offset); currentbyte; currentbyte >>= 1)
-            if (currentbyte & 1) count++;
-
-    if (ones || length == 0)
-        return count;
-    else
-        return (length * 8) - count;
-}
-
-/// Count the number of bits of a certain type in an Integer.
-/// @param[in] data The value you want bits counted for. Starting from the LSB.
-/// @param[in] length How many bits to use in the calculation? Starts at the LSB
-/// @param[in] ones Count the binary nr of `1` bits. False is count the `0`s.
-/// @param[in] init Starting value of the calculation to use. (Default is 0)
-/// @return The nr. of bits found of the given type found in the Integer.
-uint16_t countBits(const uint64_t data, const uint8_t length, const bool ones, const uint16_t init) {
-    uint16_t count = init;
-    uint8_t bitsSoFar = length;
-    
-    for (uint64_t remainder = data; remainder && bitsSoFar; remainder >>= 1, bitsSoFar--)
-        if (remainder & 1) count++;
-
-    if (ones || length == 0)
-        return count;
-    else
-        return length - count;
-}
 
 namespace esphome {
 namespace climate_ir_samsung {
@@ -51,7 +11,6 @@ namespace climate_ir_samsung {
 
         if(current_climate_mode == climate::ClimateMode::CLIMATE_MODE_OFF && this->mode != climate::ClimateMode::CLIMATE_MODE_OFF) {
             setAndSendPowerState(true);
-            std::this_thread::sleep_for(std::chrono::seconds(2));
         }
 
         current_climate_mode = this->mode;
@@ -236,5 +195,43 @@ namespace climate_ir_samsung {
         sectionsum = calcSectionChecksum(protocol.raw + kSamsungAcSectionLength * 2);
         protocol.Sum3Upper = GETBITS8(sectionsum, kHighNibble, kNibbleSize);
         protocol.Sum3Lower = GETBITS8(sectionsum, kLowNibble, kNibbleSize);
+    }
+
+    /// Count the number of bits of a certain type in an array.
+    /// @param[in] start A ptr to the start of the byte array to calculate over.
+    /// @param[in] length How many bytes to use in the calculation.
+    /// @param[in] ones Count the binary nr of `1` bits. False is count the `0`s.
+    /// @param[in] init Starting value of the calculation to use. (Default is 0)
+    /// @return The nr. of bits found of the given type found in the array.
+    uint16_t SamsungClimateIR::countBits(const uint8_t * const start, const uint16_t length, const bool ones, const uint16_t init) {
+        uint16_t count = init;
+        
+        for (uint16_t offset = 0; offset < length; offset++)
+            for (uint8_t currentbyte = *(start + offset); currentbyte; currentbyte >>= 1)
+                if (currentbyte & 1) count++;
+
+        if (ones || length == 0)
+            return count;
+        else
+            return (length * 8) - count;
+    }
+
+    /// Count the number of bits of a certain type in an Integer.
+    /// @param[in] data The value you want bits counted for. Starting from the LSB.
+    /// @param[in] length How many bits to use in the calculation? Starts at the LSB
+    /// @param[in] ones Count the binary nr of `1` bits. False is count the `0`s.
+    /// @param[in] init Starting value of the calculation to use. (Default is 0)
+    /// @return The nr. of bits found of the given type found in the Integer.
+    uint16_t SamsungClimateIR::countBits(const uint64_t data, const uint8_t length, const bool ones, const uint16_t init) {
+        uint16_t count = init;
+        uint8_t bitsSoFar = length;
+        
+        for (uint64_t remainder = data; remainder && bitsSoFar; remainder >>= 1, bitsSoFar--)
+            if (remainder & 1) count++;
+
+        if (ones || length == 0)
+            return count;
+        else
+            return length - count;
     }
 }}
