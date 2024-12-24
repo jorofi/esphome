@@ -50,11 +50,9 @@ void SamsungClimateIR::send_() {
 
     for (int y = 0; y < 8; y++) {
       if (sendByte & 0x01) {
-        // ESP_LOGI(TAG, "For Y %d 1", y);
         data->mark(SAMSUNG_AIRCON1_BIT_MARK);
         data->space(SAMSUNG_AIRCON1_ONE_SPACE);
       } else {
-        // ESP_LOGI(TAG, "For Y %d 0", y);
         data->mark(SAMSUNG_AIRCON1_BIT_MARK);
         data->space(SAMSUNG_AIRCON1_ZERO_SPACE);
       }
@@ -118,9 +116,9 @@ void SamsungClimateIR::set_mode_(const climate::ClimateMode climate_mode) {
 /// Set the temperature.
 /// @param[in] temp The temperature in degrees celsius.
 void SamsungClimateIR::set_temp_(const uint8_t temp) {
-  uint8_t newtemp = std::max(K_SAMSUNG_AC_MIN_TEMP, temp);
-  newtemp = std::min(K_SAMSUNG_AC_MAX_TEMP, newtemp);
-  protocol_.Temp = newtemp - K_SAMSUNG_AC_MIN_TEMP;
+  uint8_t new_temp = std::max(K_SAMSUNG_AC_MIN_TEMP, temp);
+  new_temp = std::min(K_SAMSUNG_AC_MAX_TEMP, new_temp);
+  protocol_.Temp = new_temp - K_SAMSUNG_AC_MIN_TEMP;
 }
 
 /// Change the AC power state.
