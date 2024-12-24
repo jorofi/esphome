@@ -125,12 +125,12 @@ void SamsungClimateIR::set_temp_(const uint8_t temp) {
 /// @param[in] on true, the AC is on. false, the AC is off.
 void SamsungClimateIR::set_and_send_power_state_(const bool on) {
   static const uint8_t kOn[K_SAMSUNG_AC_EXTENDED_STATE_LENGTH] = {0x02, 0x92, 0x0F, 0x00, 0x00, 0x00, 0xF0,
-                                                             0x01, 0xD2, 0x0F, 0x00, 0x00, 0x00, 0x00,
-                                                             0x01, 0xE2, 0xFE, 0x71, 0x80, 0x11, 0xF0};
+                                                                  0x01, 0xD2, 0x0F, 0x00, 0x00, 0x00, 0x00,
+                                                                  0x01, 0xE2, 0xFE, 0x71, 0x80, 0x11, 0xF0};
 
   static const uint8_t kOff[K_SAMSUNG_AC_EXTENDED_STATE_LENGTH] = {0x02, 0xB2, 0x0F, 0x00, 0x00, 0x00, 0xC0,
-                                                              0x01, 0xD2, 0x0F, 0x00, 0x00, 0x00, 0x00,
-                                                              0x01, 0x02, 0xFF, 0x71, 0x80, 0x11, 0xC0};
+                                                                   0x01, 0xD2, 0x0F, 0x00, 0x00, 0x00, 0x00,
+                                                                   0x01, 0x02, 0xFF, 0x71, 0x80, 0x11, 0xC0};
 
   std::memcpy(protocol_.raw, on ? kOn : kOff, K_SAMSUNG_AC_EXTENDED_STATE_LENGTH);
 
@@ -196,7 +196,7 @@ void SamsungClimateIR::checksum_(void) {
 /// @param[in] init Starting value of the calculation to use. (Default is 0)
 /// @return The nr. of bits found of the given type found in the array.
 uint16_t SamsungClimateIR::count_bits(const uint8_t *const start, const uint16_t length, const bool ones,
-                                     const uint16_t init) {
+                                      const uint16_t init) {
   uint16_t count = init;
 
   for (uint16_t offset = 0; offset < length; offset++)

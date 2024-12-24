@@ -21,8 +21,8 @@ const uint16_t K_SAMSUNG_AC_EXTENDED_STATE_LENGTH = 21;
 const uint16_t K_SAMSUNG_AC_SECTION_LENGTH = 7;
 
 // Temperature
-const uint8_t K_SAMSUNG_AC_MIN_TEMP = 16;   // C   Mask 0b11110000
-const uint8_t K_SAMSUNG_AC_MAX_TEMP = 30;   // C   Mask 0b11110000
+const uint8_t K_SAMSUNG_AC_MIN_TEMP = 16;  // C   Mask 0b11110000
+const uint8_t K_SAMSUNG_AC_MAX_TEMP = 30;  // C   Mask 0b11110000
 
 // Mode
 const uint8_t K_SAMSUNG_AC_AUTO = 0;
@@ -49,12 +49,12 @@ const uint8_t K_LOW_NIBBLE = 0;
 const uint8_t K_HIGH_NIBBLE = 4;
 
 static const uint8_t K_RESET[K_SAMSUNG_AC_EXTENDED_STATE_LENGTH] = {0x02, 0x92, 0x0F, 0x00, 0x00, 0x00, 0xF0,
-                                                              0x01, 0x02, 0xAE, 0x71, 0x00, 0x15, 0xF0};
+                                                                    0x01, 0x02, 0xAE, 0x71, 0x00, 0x15, 0xF0};
 
 /// Native representation of a Samsung A/C message.
 union SamsungProtocol {
   uint8_t raw[K_SAMSUNG_AC_EXTENDED_STATE_LENGTH];  ///< State in code form.
-  struct {                                     // Standard message map
+  struct {                                          // Standard message map
     // Byte 0
     uint8_t : 8;
     // Byte 1
@@ -197,8 +197,9 @@ class SamsungClimateIR : public climate_ir::ClimateIR {
   void checksum_();
   static uint8_t calc_section_checksum(const uint8_t *section);
   static uint16_t count_bits(const uint8_t *const start, const uint16_t length, const bool ones = true,
-                            const uint16_t init = 0);
-  static uint16_t count_bits(const uint64_t data, const uint8_t length, const bool ones = true, const uint16_t init = 0);
+                             const uint16_t init = 0);
+  static uint16_t count_bits(const uint64_t data, const uint8_t length, const bool ones = true,
+                             const uint16_t init = 0);
 };
 }  // namespace climate_ir_samsung
 }  // namespace esphome
