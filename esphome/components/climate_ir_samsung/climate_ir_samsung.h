@@ -17,49 +17,43 @@ static const int SAMSUNG_AIRCON1_ONE_SPACE = 1500;
 static const int SAMSUNG_AIRCON1_ZERO_SPACE = 500;
 static const int SAMSUNG_AIRCON1_MSG_SPACE = 2000;
 
-const uint16_t kSamsungAcExtendedStateLength = 21;
-const uint16_t kSamsungAcSectionLength = 7;
+const uint16_t K_SAMSUNG_AC_EXTENDED_STATE_LENGTH = 21;
+const uint16_t K_SAMSUNG_AC_SECTION_LENGTH = 7;
 
 // Temperature
-const uint8_t kSamsungAcMinTemp = 16;   // C   Mask 0b11110000
-const uint8_t kSamsungAcMaxTemp = 30;   // C   Mask 0b11110000
-const uint8_t kSamsungAcAutoTemp = 25;  // C   Mask 0b11110000
+const uint8_t K_SAMSUNG_AC_MIN_TEMP = 16;   // C   Mask 0b11110000
+const uint8_t K_SAMSUNG_AC_MAX_TEMP = 30;   // C   Mask 0b11110000
 
 // Mode
-const uint8_t kSamsungAcAuto = 0;
-const uint8_t kSamsungAcCool = 1;
-const uint8_t kSamsungAcDry = 2;
-const uint8_t kSamsungAcFan = 3;
-const uint8_t kSamsungAcHeat = 4;
+const uint8_t K_SAMSUNG_AC_AUTO = 0;
+const uint8_t K_SAMSUNG_AC_COOL = 1;
+const uint8_t K_SAMSUNG_AC_DRY = 2;
+const uint8_t K_SAMSUNG_AC_FAN = 3;
+const uint8_t K_SAMSUNG_AC_HEAT = 4;
 
 // Fan
-const uint8_t kSamsungAcFanAuto = 0;
-const uint8_t kSamsungAcFanLow = 2;
-const uint8_t kSamsungAcFanMed = 4;
-const uint8_t kSamsungAcFanHigh = 5;
-const uint8_t kSamsungAcFanAuto2 = 6;
-const uint8_t kSamsungAcFanTurbo = 7;
+const uint8_t K_SAMSUNG_AC_FAN_AUTO = 0;
+const uint8_t K_SAMSUNG_AC_FAN_LOW = 2;
+const uint8_t K_SAMSUNG_AC_FAN_MED = 4;
+const uint8_t K_SAMSUNG_AC_FAN_HIGH = 5;
 
 // Swing
-const uint8_t kSamsungAcSwingV = 0b010;
-const uint8_t kSamsungAcSwingH = 0b011;
-const uint8_t kSamsungAcSwingBoth = 0b100;
-const uint8_t kSamsungAcSwingOff = 0b111;
+const uint8_t K_SAMSUNG_AC_SWING_V = 0b010;
+const uint8_t K_SAMSUNG_AC_SWING_H = 0b011;
+const uint8_t K_SAMSUNG_AC_SWING_BOTH = 0b100;
+const uint8_t K_SAMSUNG_AC_SWING_OFF = 0b111;
 
 // Power
-const uint8_t kNibbleSize = 4;
-const uint8_t kLowNibble = 0;
-const uint8_t kHighNibble = 4;
-const uint8_t kModeBitsSize = 3;
+const uint8_t K_NIBBLE_SIZE = 4;
+const uint8_t K_LOW_NIBBLE = 0;
+const uint8_t K_HIGH_NIBBLE = 4;
 
-// static const uint8_t kReset[kSamsungAcExtendedStateLength] = {0x02, 0x92, 0x0F, 0x00, 0x00, 0x00, 0xF0, 0x01, 0x02,
-// 0xAE, 0x71, 0x00, 0x15, 0xF0};
-static const uint8_t kReset[kSamsungAcExtendedStateLength] = {0x02, 0x92, 0x0F, 0x00, 0x00, 0x00, 0xF0,
+static const uint8_t K_RESET[K_SAMSUNG_AC_EXTENDED_STATE_LENGTH] = {0x02, 0x92, 0x0F, 0x00, 0x00, 0x00, 0xF0,
                                                               0x01, 0x02, 0xAE, 0x71, 0x00, 0x15, 0xF0};
 
 /// Native representation of a Samsung A/C message.
 union SamsungProtocol {
-  uint8_t raw[kSamsungAcExtendedStateLength];  ///< State in code form.
+  uint8_t raw[K_SAMSUNG_AC_EXTENDED_STATE_LENGTH];  ///< State in code form.
   struct {                                     // Standard message map
     // Byte 0
     uint8_t : 8;
@@ -179,12 +173,12 @@ union SamsungProtocol {
 };
 
 class SamsungClimateIR : public climate_ir::ClimateIR {
-  SamsungProtocol protocol;
-  climate::ClimateMode current_climate_mode;
+  SamsungProtocol protocol_;
+  climate::ClimateMode current_climate_mode_;
 
  public:
   SamsungClimateIR()
-      : climate_ir::ClimateIR(kSamsungAcMinTemp, kSamsungAcMaxTemp, 1.0f, true, true,
+      : climate_ir::ClimateIR(K_SAMSUNG_AC_MIN_TEMP, K_SAMSUNG_AC_MAX_TEMP, 1.0f, true, true,
                               {climate::CLIMATE_FAN_AUTO, climate::CLIMATE_FAN_LOW, climate::CLIMATE_FAN_MEDIUM,
                                climate::CLIMATE_FAN_HIGH},
                               {climate::CLIMATE_SWING_OFF, climate::CLIMATE_SWING_VERTICAL,
@@ -193,18 +187,18 @@ class SamsungClimateIR : public climate_ir::ClimateIR {
  protected:
   void transmit_state() override;
 
-  void send();
-  void setSwing(const climate::ClimateSwingMode swingMode);
-  void setMode(const climate::ClimateMode mode);
-  void setTemp(const uint8_t temp);
-  void setAndSendPowerState(const bool on);
-  void setFan(const climate::ClimateFanMode fanMode);
+  void send_();
+  void set_swing_(const climate::ClimateSwingMode swing_mode);
+  void set_mode_(const climate::ClimateMode climate_mode);
+  void set_temp_(const uint8_t temp);
+  void set_and_send_power_state_(const bool on);
+  void set_fan_(const climate::ClimateFanMode fan_mode);
 
-  void checksum(void);
-  static uint8_t calcSectionChecksum(const uint8_t *section);
-  static uint16_t countBits(const uint8_t *const start, const uint16_t length, const bool ones = true,
+  void checksum_();
+  static uint8_t calc_section_checksum(const uint8_t *section);
+  static uint16_t count_bits(const uint8_t *const start, const uint16_t length, const bool ones = true,
                             const uint16_t init = 0);
-  static uint16_t countBits(const uint64_t data, const uint8_t length, const bool ones = true, const uint16_t init = 0);
+  static uint16_t count_bits(const uint64_t data, const uint8_t length, const bool ones = true, const uint16_t init = 0);
 };
 }  // namespace climate_ir_samsung
 }  // namespace esphome
