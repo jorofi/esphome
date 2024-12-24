@@ -191,12 +191,12 @@ class SamsungClimateIR : public climate_ir::ClimateIR {
   void set_swing_(climate::ClimateSwingMode swing_mode);
   void set_mode_(climate::ClimateMode climate_mode);
   void set_temp_(uint8_t temp);
-  void set_and_send_power_state_(const bool on);
+  void set_and_send_power_state_(bool on);
   void set_fan_(climate::ClimateFanMode fan_mode);
 
   void checksum_();
   static uint8_t calc_section_checksum(const uint8_t *section);
-  static uint16_t count_bits(uint8_t *start, uint16_t length, bool ones = true, uint16_t init = 0);
+  static uint16_t count_bits(const uint8_t *start, uint16_t length, bool ones = true, uint16_t init = 0);
   static uint16_t count_bits(uint64_t data, uint8_t length, bool ones = true, uint16_t init = 0);
 };
 }  // namespace climate_ir_samsung
