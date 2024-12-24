@@ -46,10 +46,10 @@ void SamsungClimateIR::send_() {
       data->space(SAMSUNG_AIRCON1_HDR_SPACE);
     }
 
-    uint8_t sendByte = protocol_.raw[i];
+    uint8_t send_byte = protocol_.raw[i];
 
     for (int y = 0; y < 8; y++) {
-      if (sendByte & 0x01) {
+      if (send_byte & 0x01) {
         data->mark(SAMSUNG_AIRCON1_BIT_MARK);
         data->space(SAMSUNG_AIRCON1_ONE_SPACE);
       } else {
@@ -57,7 +57,7 @@ void SamsungClimateIR::send_() {
         data->space(SAMSUNG_AIRCON1_ZERO_SPACE);
       }
 
-      sendByte >>= 1;
+      send_byte >>= 1;
     }
   }
 
@@ -124,15 +124,15 @@ void SamsungClimateIR::set_temp_(const uint8_t temp) {
 /// Change the AC power state.
 /// @param[in] on true, the AC is on. false, the AC is off.
 void SamsungClimateIR::set_and_send_power_state_(const bool on) {
-  static const uint8_t kOn[K_SAMSUNG_AC_EXTENDED_STATE_LENGTH] = {0x02, 0x92, 0x0F, 0x00, 0x00, 0x00, 0xF0,
-                                                                  0x01, 0xD2, 0x0F, 0x00, 0x00, 0x00, 0x00,
-                                                                  0x01, 0xE2, 0xFE, 0x71, 0x80, 0x11, 0xF0};
-
-  static const uint8_t kOff[K_SAMSUNG_AC_EXTENDED_STATE_LENGTH] = {0x02, 0xB2, 0x0F, 0x00, 0x00, 0x00, 0xC0,
+  static const uint8_t K_ON[K_SAMSUNG_AC_EXTENDED_STATE_LENGTH] = {0x02, 0x92, 0x0F, 0x00, 0x00, 0x00, 0xF0,
                                                                    0x01, 0xD2, 0x0F, 0x00, 0x00, 0x00, 0x00,
-                                                                   0x01, 0x02, 0xFF, 0x71, 0x80, 0x11, 0xC0};
+                                                                   0x01, 0xE2, 0xFE, 0x71, 0x80, 0x11, 0xF0};
 
-  std::memcpy(protocol_.raw, on ? kOn : kOff, K_SAMSUNG_AC_EXTENDED_STATE_LENGTH);
+  static const uint8_t K_OFF[K_SAMSUNG_AC_EXTENDED_STATE_LENGTH] = {0x02, 0xB2, 0x0F, 0x00, 0x00, 0x00, 0xC0,
+                                                                    0x01, 0xD2, 0x0F, 0x00, 0x00, 0x00, 0x00,
+                                                                    0x01, 0x02, 0xFF, 0x71, 0x80, 0x11, 0xC0};
+
+  std::memcpy(protocol_.raw, on ? K_ON : K_OFF, K_SAMSUNG_AC_EXTENDED_STATE_LENGTH);
 
   send_();
 
@@ -177,7 +177,7 @@ uint8_t SamsungClimateIR::calc_section_checksum(const uint8_t *section) {
 }
 
 /// Update the checksum_ for the internal state.
-void SamsungClimateIR::checksum_(void) {
+void SamsungClimateIR::checksum_() {
   uint8_t sectionsum = calc_section_checksum(protocol_.raw);
   protocol_.Sum1Upper = GETBITS8(sectionsum, K_HIGH_NIBBLE, K_NIBBLE_SIZE);
   protocol_.Sum1Lower = GETBITS8(sectionsum, K_LOW_NIBBLE, K_NIBBLE_SIZE);
@@ -199,15 +199,18 @@ uint16_t SamsungClimateIR::count_bits(const uint8_t *const start, const uint16_t
                                       const uint16_t init) {
   uint16_t count = init;
 
-  for (uint16_t offset = 0; offset < length; offset++)
-    for (uint8_t currentbyte = *(start + offset); currentbyte; currentbyte >>= 1)
+  for (uint16_t offset = 0; offset < length; offset++) {
+    for (uint8_t currentbyte = *(start + offset); currentbyte; currentbyte >>= 1) {
       if (currentbyte & 1)
         count++;
+    }
+  }
 
-  if (ones || length == 0)
+  if (ones || length == 0) {
     return count;
-  else
+  } else {
     return (length * 8) - count;
+  }
 }
 
 /// Count the number of bits of a certain type in an Integer.
@@ -218,16 +221,18 @@ uint16_t SamsungClimateIR::count_bits(const uint8_t *const start, const uint16_t
 /// @return The nr. of bits found of the given type found in the Integer.
 uint16_t SamsungClimateIR::count_bits(const uint64_t data, const uint8_t length, const bool ones, const uint16_t init) {
   uint16_t count = init;
-  uint8_t bitsSoFar = length;
+  uint8_t bits_so_far = length;
 
-  for (uint64_t remainder = data; remainder && bitsSoFar; remainder >>= 1, bitsSoFar--)
+  for (uint64_t remainder = data; remainder && bits_so_far; remainder >>= 1, bits_so_far--) {
     if (remainder & 1)
       count++;
+  }
 
-  if (ones || length == 0)
+  if (ones || length == 0) {
     return count;
-  else
+  } else {
     return length - count;
+  }
 }
 }  // namespace climate_ir_samsung
 }  // namespace esphome
