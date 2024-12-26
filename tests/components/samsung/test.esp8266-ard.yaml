@@ -3,5 +3,5 @@ remote_transmitter:
   carrier_duty_percent: 50%
 
 climate:
-  - platform: climate_ir_samsung
+  - platform: samsung
     name: SAMSUNG Climate
