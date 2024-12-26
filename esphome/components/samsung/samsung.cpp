@@ -1,9 +1,9 @@
-#include "climate_ir_samsung.h"
+#include "samsung.h"
 
 namespace esphome {
-namespace climate_ir_samsung {
+namespace samsung {
 
-void SamsungClimateIR::transmit_state() {
+void SamsungClimate::transmit_state() {
   if (current_climate_mode_ != climate::ClimateMode::CLIMATE_MODE_OFF &&
       this->mode == climate::ClimateMode::CLIMATE_MODE_OFF) {
     set_and_send_power_state_(false);
@@ -26,7 +26,7 @@ void SamsungClimateIR::transmit_state() {
 }
 
 /// Send the current state of the climate object.
-void SamsungClimateIR::send_() {
+void SamsungClimate::send_() {
   checksum_();
 
   auto transmit = this->transmitter_->transmit();
@@ -68,7 +68,7 @@ void SamsungClimateIR::send_() {
 }
 
 /// Set the vertical swing setting of the A/C.
-void SamsungClimateIR::set_swing_(const climate::ClimateSwingMode swing_mode) {
+void SamsungClimate::set_swing_(const climate::ClimateSwingMode swing_mode) {
   switch (swing_mode) {
     case climate::ClimateSwingMode::CLIMATE_SWING_BOTH:
       protocol_.Swing = K_SAMSUNG_AC_SWING_BOTH;
@@ -91,7 +91,7 @@ void SamsungClimateIR::set_swing_(const climate::ClimateSwingMode swing_mode) {
 
 /// Set the operating mode of the A/C.
 /// @param[in] climateMode The desired operating mode.
-void SamsungClimateIR::set_mode_(const climate::ClimateMode climate_mode) {
+void SamsungClimate::set_mode_(const climate::ClimateMode climate_mode) {
   switch (climate_mode) {
     case climate::ClimateMode::CLIMATE_MODE_HEAT:
       protocol_.Mode = K_SAMSUNG_AC_HEAT;
@@ -115,7 +115,7 @@ void SamsungClimateIR::set_mode_(const climate::ClimateMode climate_mode) {
 
 /// Set the temperature.
 /// @param[in] temp The temperature in degrees celsius.
-void SamsungClimateIR::set_temp_(const uint8_t temp) {
+void SamsungClimate::set_temp_(const uint8_t temp) {
   uint8_t new_temp = std::max(K_SAMSUNG_AC_MIN_TEMP, temp);
   new_temp = std::min(K_SAMSUNG_AC_MAX_TEMP, new_temp);
   protocol_.Temp = new_temp - K_SAMSUNG_AC_MIN_TEMP;
@@ -123,7 +123,7 @@ void SamsungClimateIR::set_temp_(const uint8_t temp) {
 
 /// Change the AC power state.
 /// @param[in] on true, the AC is on. false, the AC is off.
-void SamsungClimateIR::set_and_send_power_state_(const bool on) {
+void SamsungClimate::set_and_send_power_state_(const bool on) {
   static const uint8_t K_ON[K_SAMSUNG_AC_EXTENDED_STATE_LENGTH] = {0x02, 0x92, 0x0F, 0x00, 0x00, 0x00, 0xF0,
                                                                    0x01, 0xD2, 0x0F, 0x00, 0x00, 0x00, 0x00,
                                                                    0x01, 0xE2, 0xFE, 0x71, 0x80, 0x11, 0xF0};
@@ -140,7 +140,7 @@ void SamsungClimateIR::set_and_send_power_state_(const bool on) {
 }
 
 /// Set the fan speed.
-void SamsungClimateIR::set_fan_(const climate::ClimateFanMode fan_mode) {
+void SamsungClimate::set_fan_(const climate::ClimateFanMode fan_mode) {
   switch (fan_mode) {
     case climate::ClimateFanMode::CLIMATE_FAN_LOW:
       protocol_.Fan = K_SAMSUNG_AC_FAN_LOW;
@@ -162,7 +162,7 @@ void SamsungClimateIR::set_fan_(const climate::ClimateFanMode fan_mode) {
 /// @param[in] section The array to calc the checksum_ of.
 /// @return The calculated checksum_ value.
 /// @see https://github.com/crankyoldgit/IRremoteESP8266/issues/1538#issuecomment-894645947
-uint8_t SamsungClimateIR::calc_section_checksum(const uint8_t *section) {
+uint8_t SamsungClimate::calc_section_checksum(const uint8_t *section) {
   uint8_t sum = 0;
 
   sum += count_bits(*section, 8);  // Include the entire first byte
@@ -177,7 +177,7 @@ uint8_t SamsungClimateIR::calc_section_checksum(const uint8_t *section) {
 }
 
 /// Update the checksum_ for the internal state.
-void SamsungClimateIR::checksum_() {
+void SamsungClimate::checksum_() {
   uint8_t sectionsum = calc_section_checksum(protocol_.raw);
   protocol_.Sum1Upper = GETBITS8(sectionsum, K_HIGH_NIBBLE, K_NIBBLE_SIZE);
   protocol_.Sum1Lower = GETBITS8(sectionsum, K_LOW_NIBBLE, K_NIBBLE_SIZE);
@@ -195,8 +195,8 @@ void SamsungClimateIR::checksum_() {
 /// @param[in] ones Count the binary nr of `1` bits. False is count the `0`s.
 /// @param[in] init Starting value of the calculation to use. (Default is 0)
 /// @return The nr. of bits found of the given type found in the array.
-uint16_t SamsungClimateIR::count_bits(const uint8_t *const start, const uint16_t length, const bool ones,
-                                      const uint16_t init) {
+uint16_t SamsungClimate::count_bits(const uint8_t *const start, const uint16_t length, const bool ones,
+                                    const uint16_t init) {
   uint16_t count = init;
 
   for (uint16_t offset = 0; offset < length; offset++) {
@@ -219,7 +219,7 @@ uint16_t SamsungClimateIR::count_bits(const uint8_t *const start, const uint16_t
 /// @param[in] ones Count the binary nr of `1` bits. False is count the `0`s.
 /// @param[in] init Starting value of the calculation to use. (Default is 0)
 /// @return The nr. of bits found of the given type found in the Integer.
-uint16_t SamsungClimateIR::count_bits(const uint64_t data, const uint8_t length, const bool ones, const uint16_t init) {
+uint16_t SamsungClimate::count_bits(const uint64_t data, const uint8_t length, const bool ones, const uint16_t init) {
   uint16_t count = init;
   uint8_t bits_so_far = length;
 
@@ -234,5 +234,5 @@ uint16_t SamsungClimateIR::count_bits(const uint64_t data, const uint8_t length,
     return length - count;
   }
 }
-}  // namespace climate_ir_samsung
+}  // namespace samsung
 }  // namespace esphome

@@ -4,7 +4,7 @@
 #include "esphome/components/climate_ir/climate_ir.h"
 
 namespace esphome {
-namespace climate_ir_samsung {
+namespace samsung {
 
 #define GETBITS8(data, offset, size) (((data) & (((uint8_t) UINT8_MAX >> (8 - (size))) << (offset))) >> (offset))
 
@@ -172,12 +172,12 @@ union SamsungProtocol {
   };
 };
 
-class SamsungClimateIR : public climate_ir::ClimateIR {
+class SamsungClimate : public climate_ir::ClimateIR {
   SamsungProtocol protocol_;
   climate::ClimateMode current_climate_mode_;
 
  public:
-  SamsungClimateIR()
+  SamsungClimate()
       : climate_ir::ClimateIR(K_SAMSUNG_AC_MIN_TEMP, K_SAMSUNG_AC_MAX_TEMP, 1.0f, true, true,
                               {climate::CLIMATE_FAN_AUTO, climate::CLIMATE_FAN_LOW, climate::CLIMATE_FAN_MEDIUM,
                                climate::CLIMATE_FAN_HIGH},
@@ -199,5 +199,6 @@ class SamsungClimateIR : public climate_ir::ClimateIR {
   static uint16_t count_bits(const uint8_t *start, uint16_t length, bool ones = true, uint16_t init = 0);
   static uint16_t count_bits(uint64_t data, uint8_t length, bool ones = true, uint16_t init = 0);
 };
-}  // namespace climate_ir_samsung
+;
+}  // namespace samsung
 }  // namespace esphome

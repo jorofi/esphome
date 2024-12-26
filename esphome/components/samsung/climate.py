@@ -7,11 +7,11 @@ CODEOWNERS = ["@jorofi"]
 
 AUTO_LOAD = ["climate_ir"]
 
-samsung_ns = cg.esphome_ns.namespace("climate_ir_samsung")
-SamsungClimateIR = samsung_ns.class_("SamsungClimateIR", climate_ir.ClimateIR)
+samsung_ns = cg.esphome_ns.namespace("samsung")
+SamsungClimate = samsung_ns.class_("SamsungClimate", climate_ir.ClimateIR)
 
 CONFIG_SCHEMA = climate_ir.CLIMATE_IR_WITH_RECEIVER_SCHEMA.extend(
-    {cv.GenerateID(): cv.declare_id(SamsungClimateIR)}
+    {cv.GenerateID(): cv.declare_id(SamsungClimate)}
 )
 
 
