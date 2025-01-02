@@ -184,21 +184,45 @@ class SamsungClimate : public climate_ir::ClimateIR {
                                climate::CLIMATE_SWING_HORIZONTAL, climate::CLIMATE_SWING_BOTH}) {}
 
  protected:
-  // Transmit via IR the state of this climate controller
+  /// Transmit via IR the state of this climate controller
   void transmit_state() override;
 
+  /// Send the current state of the climate object.
   void send_();
+  /// Change the AC power state.
+  /// @param[in] on true, the AC is on. false, the AC is off.
   void send_power_state_(bool on);
+  /// Set the swing setting of the A/C.
   void set_swing_(climate::ClimateSwingMode swing_mode);
+  /// Set the operating mode of the A/C.
+  /// @param[in] climate_mode The desired operating mode.
   void set_mode_(climate::ClimateMode climate_mode);
+  /// Set the temperature.
+  /// @param[in] temp The temperature in degrees celsius.
   void set_temp_(uint8_t temp);
+  /// Set the fan speed.
   void set_fan_(climate::ClimateFanMode fan_mode);
-
+  /// Update the checksum_ for the internal state.
   void checksum_();
+  /// Calculate the checksum_ for a given state section.
+  /// @param[in] section The array to calc the checksum_ of.
+  /// @return The calculated checksum_ value.
+  /// @see https://github.com/crankyoldgit/IRremoteESP8266/issues/1538#issuecomment-894645947
   static uint8_t calc_section_checksum(const uint8_t *section);
+  /// Count the number of bits of a certain type in an array.
+  /// @param[in] start A ptr to the start of the byte array to calculate over.
+  /// @param[in] length How many bytes to use in the calculation.
+  /// @param[in] ones Count the binary nr of `1` bits. False is count the `0`s.
+  /// @param[in] init Starting value of the calculation to use. (Default is 0)
+  /// @return The nr. of bits found of the given type found in the array.
   static uint16_t count_bits(const uint8_t *start, uint16_t length, bool ones = true, uint16_t init = 0);
+  /// Count the number of bits of a certain type in an Integer.
+  /// @param[in] data The value you want bits counted for. Starting from the LSB.
+  /// @param[in] length How many bits to use in the calculation? Starts at the LSB
+  /// @param[in] ones Count the binary nr of `1` bits. False is count the `0`s.
+  /// @param[in] init Starting value of the calculation to use. (Default is 0)
+  /// @return The nr. of bits found of the given type found in the Integer.
   static uint16_t count_bits(uint64_t data, uint8_t length, bool ones = true, uint16_t init = 0);
 };
-;
 }  // namespace samsung
 }  // namespace esphome

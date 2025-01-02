@@ -26,7 +26,6 @@ void SamsungClimate::transmit_state() {
   send_();
 }
 
-/// Send the current state of the climate object.
 void SamsungClimate::send_() {
   checksum_();
 
@@ -64,7 +63,6 @@ void SamsungClimate::send_() {
   transmit.perform();
 }
 
-/// Set the vertical swing setting of the A/C.
 void SamsungClimate::set_swing_(const climate::ClimateSwingMode swing_mode) {
   switch (swing_mode) {
     case climate::ClimateSwingMode::CLIMATE_SWING_BOTH:
@@ -83,8 +81,6 @@ void SamsungClimate::set_swing_(const climate::ClimateSwingMode swing_mode) {
   }
 }
 
-/// Set the operating mode of the A/C.
-/// @param[in] climateMode The desired operating mode.
 void SamsungClimate::set_mode_(const climate::ClimateMode climate_mode) {
   switch (climate_mode) {
     case climate::ClimateMode::CLIMATE_MODE_HEAT:
@@ -107,14 +103,10 @@ void SamsungClimate::set_mode_(const climate::ClimateMode climate_mode) {
   }
 }
 
-/// Set the temperature.
-/// @param[in] temp The temperature in degrees celsius.
 void SamsungClimate::set_temp_(const uint8_t temp) {
   protocol_.Temp = esphome::clamp<uint8_t>(temp, K_SAMSUNG_AC_MIN_TEMP, K_SAMSUNG_AC_MAX_TEMP);
 }
 
-/// Change the AC power state.
-/// @param[in] on true, the AC is on. false, the AC is off.
 void SamsungClimate::send_power_state_(const bool on) {
   static const uint8_t K_ON[K_SAMSUNG_AC_EXTENDED_STATE_LENGTH] = {0x02, 0x92, 0x0F, 0x00, 0x00, 0x00, 0xF0,
                                                                    0x01, 0xD2, 0x0F, 0x00, 0x00, 0x00, 0x00,
@@ -131,7 +123,6 @@ void SamsungClimate::send_power_state_(const bool on) {
   std::memcpy(protocol_.raw, K_RESET, K_SAMSUNG_AC_EXTENDED_STATE_LENGTH);
 }
 
-/// Set the fan speed.
 void SamsungClimate::set_fan_(const climate::ClimateFanMode fan_mode) {
   switch (fan_mode) {
     case climate::ClimateFanMode::CLIMATE_FAN_LOW:
@@ -150,10 +141,6 @@ void SamsungClimate::set_fan_(const climate::ClimateFanMode fan_mode) {
   }
 }
 
-/// Calculate the checksum_ for a given state section.
-/// @param[in] section The array to calc the checksum_ of.
-/// @return The calculated checksum_ value.
-/// @see https://github.com/crankyoldgit/IRremoteESP8266/issues/1538#issuecomment-894645947
 uint8_t SamsungClimate::calc_section_checksum(const uint8_t *section) {
   uint8_t sum = 0;
 
@@ -168,7 +155,6 @@ uint8_t SamsungClimate::calc_section_checksum(const uint8_t *section) {
   return sum ^ UINT8_MAX;
 }
 
-/// Update the checksum_ for the internal state.
 void SamsungClimate::checksum_() {
   uint8_t sectionsum = calc_section_checksum(protocol_.raw);
   protocol_.Sum1Upper = GETBITS8(sectionsum, K_HIGH_NIBBLE, K_NIBBLE_SIZE);
@@ -181,12 +167,6 @@ void SamsungClimate::checksum_() {
   protocol_.Sum3Lower = GETBITS8(sectionsum, K_LOW_NIBBLE, K_NIBBLE_SIZE);
 }
 
-/// Count the number of bits of a certain type in an array.
-/// @param[in] start A ptr to the start of the byte array to calculate over.
-/// @param[in] length How many bytes to use in the calculation.
-/// @param[in] ones Count the binary nr of `1` bits. False is count the `0`s.
-/// @param[in] init Starting value of the calculation to use. (Default is 0)
-/// @return The nr. of bits found of the given type found in the array.
 uint16_t SamsungClimate::count_bits(const uint8_t *const start, const uint16_t length, const bool ones,
                                     const uint16_t init) {
   uint16_t count = init;
@@ -205,12 +185,6 @@ uint16_t SamsungClimate::count_bits(const uint8_t *const start, const uint16_t l
   }
 }
 
-/// Count the number of bits of a certain type in an Integer.
-/// @param[in] data The value you want bits counted for. Starting from the LSB.
-/// @param[in] length How many bits to use in the calculation? Starts at the LSB
-/// @param[in] ones Count the binary nr of `1` bits. False is count the `0`s.
-/// @param[in] init Starting value of the calculation to use. (Default is 0)
-/// @return The nr. of bits found of the given type found in the Integer.
 uint16_t SamsungClimate::count_bits(const uint64_t data, const uint8_t length, const bool ones, const uint16_t init) {
   uint16_t count = init;
   uint8_t bits_so_far = length;
