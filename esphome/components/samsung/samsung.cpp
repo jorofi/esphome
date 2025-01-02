@@ -1,4 +1,5 @@
 #include "samsung.h"
+#include "esphome/core/helpers.h"
 
 namespace esphome {
 namespace samsung {
@@ -6,13 +7,13 @@ namespace samsung {
 void SamsungClimate::transmit_state() {
   if (current_climate_mode_ != climate::ClimateMode::CLIMATE_MODE_OFF &&
       this->mode == climate::ClimateMode::CLIMATE_MODE_OFF) {
-    set_and_send_power_state_(false);
+    send_power_state_(false);
     return;
   }
 
   if (current_climate_mode_ == climate::ClimateMode::CLIMATE_MODE_OFF &&
       this->mode != climate::ClimateMode::CLIMATE_MODE_OFF) {
-    set_and_send_power_state_(true);
+    send_power_state_(true);
   }
 
   current_climate_mode_ = this->mode;
@@ -31,30 +32,27 @@ void SamsungClimate::send_() {
 
   auto transmit = this->transmitter_->transmit();
   auto *data = transmit.get_data();
-  data->set_carrier_frequency(SAMSUNG_IR_FREQUENCY);
+
+  // Header(2) +  2 * MSG_HDR(2 * Item(2)) + 21 Bytes * 8 Bits * Bit(2) + Last Mark (1)
+  data->reserve(2 + 2 * 2 * 2 + 21 * 8 * 2 + 1);
+  data->set_carrier_frequency(SAMSUNG_IR_FREQUENCY_HZ);
 
   // Header
-  data->mark(SAMSUNG_AIRCON1_HDR_MARK);
-  data->space(SAMSUNG_AIRCON1_HDR_SPACE);
+  data->item(SAMSUNG_AIRCON1_HDR_MARK, SAMSUNG_AIRCON1_HDR_SPACE);
 
   for (int i = 0; i < 21; i++) {
     if (i == 7 || i == 14) {
-      data->mark(SAMSUNG_AIRCON1_BIT_MARK);
-      data->space(SAMSUNG_AIRCON1_MSG_SPACE);
-
-      data->mark(SAMSUNG_AIRCON1_HDR_MARK);
-      data->space(SAMSUNG_AIRCON1_HDR_SPACE);
+      data->item(SAMSUNG_AIRCON1_BIT_MARK, SAMSUNG_AIRCON1_ONE_SPACE);
+      data->item(SAMSUNG_AIRCON1_HDR_MARK, SAMSUNG_AIRCON1_HDR_SPACE);
     }
 
     uint8_t send_byte = protocol_.raw[i];
 
     for (int y = 0; y < 8; y++) {
       if (send_byte & 0x01) {
-        data->mark(SAMSUNG_AIRCON1_BIT_MARK);
-        data->space(SAMSUNG_AIRCON1_ONE_SPACE);
+        data->item(SAMSUNG_AIRCON1_BIT_MARK, SAMSUNG_AIRCON1_ONE_SPACE);
       } else {
-        data->mark(SAMSUNG_AIRCON1_BIT_MARK);
-        data->space(SAMSUNG_AIRCON1_ZERO_SPACE);
+        data->item(SAMSUNG_AIRCON1_BIT_MARK, SAMSUNG_AIRCON1_ZERO_SPACE);
       }
 
       send_byte >>= 1;
@@ -62,7 +60,6 @@ void SamsungClimate::send_() {
   }
 
   data->mark(SAMSUNG_AIRCON1_BIT_MARK);
-  data->space(0);
 
   transmit.perform();
 }
@@ -75,16 +72,13 @@ void SamsungClimate::set_swing_(const climate::ClimateSwingMode swing_mode) {
       break;
     case climate::ClimateSwingMode::CLIMATE_SWING_HORIZONTAL:
       protocol_.Swing = K_SAMSUNG_AC_SWING_H;
-      ;
       break;
     case climate::ClimateSwingMode::CLIMATE_SWING_VERTICAL:
       protocol_.Swing = K_SAMSUNG_AC_SWING_V;
-      ;
       break;
     case climate::ClimateSwingMode::CLIMATE_SWING_OFF:
     default:
       protocol_.Swing = K_SAMSUNG_AC_SWING_OFF;
-      ;
       break;
   }
 }
@@ -116,14 +110,12 @@ void SamsungClimate::set_mode_(const climate::ClimateMode climate_mode) {
 /// Set the temperature.
 /// @param[in] temp The temperature in degrees celsius.
 void SamsungClimate::set_temp_(const uint8_t temp) {
-  uint8_t new_temp = std::max(K_SAMSUNG_AC_MIN_TEMP, temp);
-  new_temp = std::min(K_SAMSUNG_AC_MAX_TEMP, new_temp);
-  protocol_.Temp = new_temp - K_SAMSUNG_AC_MIN_TEMP;
+  protocol_.Temp = esphome::clamp<uint8_t>(temp, K_SAMSUNG_AC_MIN_TEMP, K_SAMSUNG_AC_MAX_TEMP);
 }
 
 /// Change the AC power state.
 /// @param[in] on true, the AC is on. false, the AC is off.
-void SamsungClimate::set_and_send_power_state_(const bool on) {
+void SamsungClimate::send_power_state_(const bool on) {
   static const uint8_t K_ON[K_SAMSUNG_AC_EXTENDED_STATE_LENGTH] = {0x02, 0x92, 0x0F, 0x00, 0x00, 0x00, 0xF0,
                                                                    0x01, 0xD2, 0x0F, 0x00, 0x00, 0x00, 0x00,
                                                                    0x01, 0xE2, 0xFE, 0x71, 0x80, 0x11, 0xF0};

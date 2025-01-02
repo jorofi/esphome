@@ -8,14 +8,13 @@ namespace samsung {
 
 #define GETBITS8(data, offset, size) (((data) & (((uint8_t) UINT8_MAX >> (8 - (size))) << (offset))) >> (offset))
 
-static const char *const TAG = "samsung.climate";
-static const uint32_t SAMSUNG_IR_FREQUENCY = 38000;
-static const int SAMSUNG_AIRCON1_HDR_MARK = 3000;
-static const int SAMSUNG_AIRCON1_HDR_SPACE = 9000;
-static const int SAMSUNG_AIRCON1_BIT_MARK = 500;
-static const int SAMSUNG_AIRCON1_ONE_SPACE = 1500;
-static const int SAMSUNG_AIRCON1_ZERO_SPACE = 500;
-static const int SAMSUNG_AIRCON1_MSG_SPACE = 2000;
+static const uint32_t SAMSUNG_IR_FREQUENCY_HZ = 38000;
+static const uint32_t SAMSUNG_AIRCON1_HDR_MARK = 3000;
+static const uint32_t SAMSUNG_AIRCON1_HDR_SPACE = 9000;
+static const uint32_t SAMSUNG_AIRCON1_BIT_MARK = 500;
+static const uint32_t SAMSUNG_AIRCON1_ONE_SPACE = 1500;
+static const uint32_t SAMSUNG_AIRCON1_ZERO_SPACE = 500;
+static const uint32_t SAMSUNG_AIRCON1_MSG_SPACE = 2000;
 
 const uint16_t K_SAMSUNG_AC_EXTENDED_STATE_LENGTH = 21;
 const uint16_t K_SAMSUNG_AC_SECTION_LENGTH = 7;
@@ -185,13 +184,14 @@ class SamsungClimate : public climate_ir::ClimateIR {
                                climate::CLIMATE_SWING_HORIZONTAL, climate::CLIMATE_SWING_BOTH}) {}
 
  protected:
+  // Transmit via IR the state of this climate controller
   void transmit_state() override;
 
   void send_();
+  void send_power_state_(bool on);
   void set_swing_(climate::ClimateSwingMode swing_mode);
   void set_mode_(climate::ClimateMode climate_mode);
   void set_temp_(uint8_t temp);
-  void set_and_send_power_state_(bool on);
   void set_fan_(climate::ClimateFanMode fan_mode);
 
   void checksum_();
