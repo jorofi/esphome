@@ -133,11 +133,11 @@ union SamsungProtocol {
     uint8_t sum_2_lower : 4;
     // Byte 9
     uint8_t sum_2_upper : 4;
-    uint8_t off_time_mins : 3;  // In units of 10's of mins
+    uint8_t off_time_mins : 3;   // In units of 10's of mins
     uint8_t off_time_hrs_1 : 1;  // LSB of the number of hours.
     // Byte 10
     uint8_t off_time_hrs_2 : 4;  // MSBs of the number of hours.
-    uint8_t on_time_mins : 3;   // In units of 10's of mins
+    uint8_t on_time_mins : 3;    // In units of 10's of mins
     uint8_t on_time_hrs_1 : 1;   // LSB of the number of hours.
     // Byte 11
     uint8_t on_time_hrs_2 : 4;  // MSBs of the number of hours.
