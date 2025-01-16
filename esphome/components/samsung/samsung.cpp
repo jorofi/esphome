@@ -7,27 +7,27 @@ namespace samsung {
 void SamsungClimate::transmit_state() {
   if (current_climate_mode_ != climate::ClimateMode::CLIMATE_MODE_OFF &&
       this->mode == climate::ClimateMode::CLIMATE_MODE_OFF) {
-    send_power_state_(false);
+    this->send_power_state_(false);
     return;
   }
 
   if (current_climate_mode_ == climate::ClimateMode::CLIMATE_MODE_OFF &&
       this->mode != climate::ClimateMode::CLIMATE_MODE_OFF) {
-    send_power_state_(true);
+    this->send_power_state_(true);
   }
 
   current_climate_mode_ = this->mode;
 
-  set_mode_(this->mode);
-  set_temp_(this->target_temperature);
-  set_swing_(this->swing_mode);
-  set_fan_(this->fan_mode.has_value() ? this->fan_mode.value() : climate::CLIMATE_FAN_AUTO);
+  this->set_mode_(this->mode);
+  this->set_temp_(this->target_temperature);
+  this->set_swing_(this->swing_mode);
+  this->set_fan_(this->fan_mode.has_value() ? this->fan_mode.value() : climate::CLIMATE_FAN_AUTO);
 
-  send_();
+  this->send_();
 }
 
 void SamsungClimate::send_() {
-  checksum_();
+  this->checksum_();
 
   auto transmit = this->transmitter_->transmit();
   auto *data = transmit.get_data();
@@ -66,17 +66,17 @@ void SamsungClimate::send_() {
 void SamsungClimate::set_swing_(const climate::ClimateSwingMode swing_mode) {
   switch (swing_mode) {
     case climate::ClimateSwingMode::CLIMATE_SWING_BOTH:
-      protocol_.Swing = K_SAMSUNG_AC_SWING_BOTH;
+      protocol_.swing = K_SAMSUNG_AC_SWING_BOTH;
       break;
     case climate::ClimateSwingMode::CLIMATE_SWING_HORIZONTAL:
-      protocol_.Swing = K_SAMSUNG_AC_SWING_H;
+      protocol_.swing = K_SAMSUNG_AC_SWING_H;
       break;
     case climate::ClimateSwingMode::CLIMATE_SWING_VERTICAL:
-      protocol_.Swing = K_SAMSUNG_AC_SWING_V;
+      protocol_.swing = K_SAMSUNG_AC_SWING_V;
       break;
     case climate::ClimateSwingMode::CLIMATE_SWING_OFF:
     default:
-      protocol_.Swing = K_SAMSUNG_AC_SWING_OFF;
+      protocol_.swing = K_SAMSUNG_AC_SWING_OFF;
       break;
   }
 }
@@ -84,27 +84,27 @@ void SamsungClimate::set_swing_(const climate::ClimateSwingMode swing_mode) {
 void SamsungClimate::set_mode_(const climate::ClimateMode climate_mode) {
   switch (climate_mode) {
     case climate::ClimateMode::CLIMATE_MODE_HEAT:
-      protocol_.Mode = K_SAMSUNG_AC_HEAT;
+      protocol_.mode = K_SAMSUNG_AC_HEAT;
       break;
     case climate::ClimateMode::CLIMATE_MODE_DRY:
-      protocol_.Mode = K_SAMSUNG_AC_DRY;
+      protocol_.mode = K_SAMSUNG_AC_DRY;
       break;
     case climate::ClimateMode::CLIMATE_MODE_COOL:
-      protocol_.Mode = K_SAMSUNG_AC_COOL;
+      protocol_.mode = K_SAMSUNG_AC_COOL;
       break;
     case climate::ClimateMode::CLIMATE_MODE_FAN_ONLY:
-      protocol_.Mode = K_SAMSUNG_AC_FAN;
+      protocol_.mode = K_SAMSUNG_AC_FAN;
       break;
     case climate::ClimateMode::CLIMATE_MODE_HEAT_COOL:
     case climate::ClimateMode::CLIMATE_MODE_AUTO:
     default:
-      protocol_.Mode = K_SAMSUNG_AC_AUTO;
+      protocol_.mode = K_SAMSUNG_AC_AUTO;
       break;
   }
 }
 
 void SamsungClimate::set_temp_(const uint8_t temp) {
-  protocol_.Temp = esphome::clamp<uint8_t>(temp, K_SAMSUNG_AC_MIN_TEMP, K_SAMSUNG_AC_MAX_TEMP);
+  protocol_.temp = esphome::clamp<uint8_t>(temp, K_SAMSUNG_AC_MIN_TEMP, K_SAMSUNG_AC_MAX_TEMP);
 }
 
 void SamsungClimate::send_power_state_(const bool on) {
@@ -118,7 +118,7 @@ void SamsungClimate::send_power_state_(const bool on) {
 
   std::memcpy(protocol_.raw, on ? K_ON : K_OFF, K_SAMSUNG_AC_EXTENDED_STATE_LENGTH);
 
-  send_();
+  this->send_();
 
   std::memcpy(protocol_.raw, K_RESET, K_SAMSUNG_AC_EXTENDED_STATE_LENGTH);
 }
@@ -126,17 +126,17 @@ void SamsungClimate::send_power_state_(const bool on) {
 void SamsungClimate::set_fan_(const climate::ClimateFanMode fan_mode) {
   switch (fan_mode) {
     case climate::ClimateFanMode::CLIMATE_FAN_LOW:
-      protocol_.Fan = K_SAMSUNG_AC_FAN_LOW;
+      protocol_.fan = K_SAMSUNG_AC_FAN_LOW;
       break;
     case climate::ClimateFanMode::CLIMATE_FAN_MEDIUM:
-      protocol_.Fan = K_SAMSUNG_AC_FAN_MED;
+      protocol_.fan = K_SAMSUNG_AC_FAN_MED;
       break;
     case climate::ClimateFanMode::CLIMATE_FAN_HIGH:
-      protocol_.Fan = K_SAMSUNG_AC_FAN_HIGH;
+      protocol_.fan = K_SAMSUNG_AC_FAN_HIGH;
       break;
     case climate::ClimateFanMode::CLIMATE_FAN_AUTO:
     default:
-      protocol_.Fan = K_SAMSUNG_AC_FAN_AUTO;
+      protocol_.fan = K_SAMSUNG_AC_FAN_AUTO;
       break;
   }
 }
@@ -156,15 +156,15 @@ uint8_t SamsungClimate::calc_section_checksum(const uint8_t *section) {
 }
 
 void SamsungClimate::checksum_() {
-  uint8_t sectionsum = calc_section_checksum(protocol_.raw);
-  protocol_.Sum1Upper = GETBITS8(sectionsum, K_HIGH_NIBBLE, K_NIBBLE_SIZE);
-  protocol_.Sum1Lower = GETBITS8(sectionsum, K_LOW_NIBBLE, K_NIBBLE_SIZE);
-  sectionsum = calc_section_checksum(protocol_.raw + K_SAMSUNG_AC_SECTION_LENGTH);
-  protocol_.Sum2Upper = GETBITS8(sectionsum, K_HIGH_NIBBLE, K_NIBBLE_SIZE);
-  protocol_.Sum2Lower = GETBITS8(sectionsum, K_LOW_NIBBLE, K_NIBBLE_SIZE);
-  sectionsum = calc_section_checksum(protocol_.raw + K_SAMSUNG_AC_SECTION_LENGTH * 2);
-  protocol_.Sum3Upper = GETBITS8(sectionsum, K_HIGH_NIBBLE, K_NIBBLE_SIZE);
-  protocol_.Sum3Lower = GETBITS8(sectionsum, K_LOW_NIBBLE, K_NIBBLE_SIZE);
+  uint8_t sectionsum = this->calc_section_checksum(protocol_.raw);
+  protocol_.sum_1_upper = GETBITS8(sectionsum, K_HIGH_NIBBLE, K_NIBBLE_SIZE);
+  protocol_.sum_1_lower = GETBITS8(sectionsum, K_LOW_NIBBLE, K_NIBBLE_SIZE);
+  sectionsum = this->calc_section_checksum(protocol_.raw + K_SAMSUNG_AC_SECTION_LENGTH);
+  protocol_.sum_2_upper = GETBITS8(sectionsum, K_HIGH_NIBBLE, K_NIBBLE_SIZE);
+  protocol_.sum_2_lower = GETBITS8(sectionsum, K_LOW_NIBBLE, K_NIBBLE_SIZE);
+  sectionsum = this->calc_section_checksum(protocol_.raw + K_SAMSUNG_AC_SECTION_LENGTH * 2);
+  protocol_.sum_3_upper = GETBITS8(sectionsum, K_HIGH_NIBBLE, K_NIBBLE_SIZE);
+  protocol_.sum_3_lower = GETBITS8(sectionsum, K_LOW_NIBBLE, K_NIBBLE_SIZE);
 }
 
 uint16_t SamsungClimate::count_bits(const uint8_t *const start, const uint16_t length, const bool ones,

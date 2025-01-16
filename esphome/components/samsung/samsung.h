@@ -58,9 +58,9 @@ union SamsungProtocol {
     uint8_t : 8;
     // Byte 1
     uint8_t : 4;
-    uint8_t : 4;  // Sum1Lower
+    uint8_t : 4;  // sum_1_lower
     // Byte 2
-    uint8_t : 4;  // Sum1Upper
+    uint8_t : 4;  // sum_1_upper
     uint8_t : 4;
     // Byte 3
     uint8_t : 8;
@@ -68,43 +68,43 @@ union SamsungProtocol {
     uint8_t : 8;
     // Byte 5
     uint8_t : 4;
-    uint8_t Sleep5 : 1;
-    uint8_t Quiet : 1;
+    uint8_t sleep_5 : 1;
+    uint8_t quiet : 1;
     uint8_t : 2;
     // Byte 6
     uint8_t : 4;
-    uint8_t Power1 : 2;
+    uint8_t power_1 : 2;
     uint8_t : 2;
     // Byte 7
     uint8_t : 8;
     // Byte 8
     uint8_t : 4;
-    uint8_t : 4;  // Sum2Lower
+    uint8_t : 4;  // sum_2_lower
     // Byte 9
-    uint8_t : 4;  // Sum1Upper
-    uint8_t Swing : 3;
+    uint8_t : 4;  // sum_1_upper
+    uint8_t swing : 3;
     uint8_t : 1;
     // Byte 10
     uint8_t : 1;
-    uint8_t FanSpecial : 3;  // Powerful, Breeze/WindFree, Econo
-    uint8_t Display : 1;
+    uint8_t fan_special : 3;  // Powerful, Breeze/WindFree, Econo
+    uint8_t display : 1;
     uint8_t : 2;
-    uint8_t CleanToggle10 : 1;
+    uint8_t clean_toggle_10 : 1;
     // Byte 11
-    uint8_t Ion : 1;
-    uint8_t CleanToggle11 : 1;
+    uint8_t ion : 1;
+    uint8_t clean_toggle_11 : 1;
     uint8_t : 2;
-    uint8_t Temp : 4;
+    uint8_t temp : 4;
     // Byte 12
     uint8_t : 1;
-    uint8_t Fan : 3;
-    uint8_t Mode : 3;
+    uint8_t fan : 3;
+    uint8_t mode : 3;
     uint8_t : 1;
     // Byte 13
     uint8_t : 2;
-    uint8_t BeepToggle : 1;
+    uint8_t beep_toggle : 1;
     uint8_t : 1;
-    uint8_t Power2 : 2;
+    uint8_t power_2 : 2;
     uint8_t : 2;
   };
   struct {  // Extended message map
@@ -113,9 +113,9 @@ union SamsungProtocol {
     uint8_t : 8;
     // Byte 1
     uint8_t : 4;
-    uint8_t Sum1Lower : 4;
+    uint8_t sum_1_lower : 4;
     // Byte 2
-    uint8_t Sum1Upper : 4;
+    uint8_t sum_1_upper : 4;
     uint8_t : 4;
     // Byte 3
     uint8_t : 8;
@@ -130,24 +130,24 @@ union SamsungProtocol {
     uint8_t : 8;
     // Byte 8
     uint8_t : 4;
-    uint8_t Sum2Lower : 4;
+    uint8_t sum_2_lower : 4;
     // Byte 9
-    uint8_t Sum2Upper : 4;
-    uint8_t OffTimeMins : 3;  // In units of 10's of mins
-    uint8_t OffTimeHrs1 : 1;  // LSB of the number of hours.
+    uint8_t sum_2_upper : 4;
+    uint8_t off_time_mins : 3;  // In units of 10's of mins
+    uint8_t off_time_hrs_1 : 1;  // LSB of the number of hours.
     // Byte 10
-    uint8_t OffTimeHrs2 : 4;  // MSBs of the number of hours.
-    uint8_t OnTimeMins : 3;   // In units of 10's of mins
-    uint8_t OnTimeHrs1 : 1;   // LSB of the number of hours.
+    uint8_t off_time_hrs_2 : 4;  // MSBs of the number of hours.
+    uint8_t on_time_mins : 3;   // In units of 10's of mins
+    uint8_t on_time_hrs_1 : 1;   // LSB of the number of hours.
     // Byte 11
-    uint8_t OnTimeHrs2 : 4;  // MSBs of the number of hours.
+    uint8_t on_time_hrs_2 : 4;  // MSBs of the number of hours.
     uint8_t : 4;
     // Byte 12
-    uint8_t OffTimeDay : 1;
-    uint8_t OnTimerEnable : 1;
-    uint8_t OffTimerEnable : 1;
-    uint8_t Sleep12 : 1;
-    uint8_t OnTimeDay : 1;
+    uint8_t off_time_day : 1;
+    uint8_t on_timer_enable : 1;
+    uint8_t off_timer_enable : 1;
+    uint8_t sleep_12 : 1;
+    uint8_t on_time_day : 1;
     uint8_t : 3;
     // Byte 13
     uint8_t : 8;
@@ -156,9 +156,9 @@ union SamsungProtocol {
     uint8_t : 8;
     // Byte 15
     uint8_t : 4;
-    uint8_t Sum3Lower : 4;
+    uint8_t sum_3_lower : 4;
     // Byte 16
-    uint8_t Sum3Upper : 4;
+    uint8_t sum_3_upper : 4;
     uint8_t : 4;
     // Byte 17
     uint8_t : 8;
