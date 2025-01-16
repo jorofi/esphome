@@ -156,13 +156,13 @@ uint8_t SamsungClimate::calc_section_checksum(const uint8_t *section) {
 }
 
 void SamsungClimate::checksum_() {
-  uint8_t sectionsum = this->calc_section_checksum(protocol_.raw);
+  uint8_t sectionsum = calc_section_checksum(protocol_.raw);
   protocol_.sum_1_upper = GETBITS8(sectionsum, K_HIGH_NIBBLE, K_NIBBLE_SIZE);
   protocol_.sum_1_lower = GETBITS8(sectionsum, K_LOW_NIBBLE, K_NIBBLE_SIZE);
-  sectionsum = this->calc_section_checksum(protocol_.raw + K_SAMSUNG_AC_SECTION_LENGTH);
+  sectionsum = calc_section_checksum(protocol_.raw + K_SAMSUNG_AC_SECTION_LENGTH);
   protocol_.sum_2_upper = GETBITS8(sectionsum, K_HIGH_NIBBLE, K_NIBBLE_SIZE);
   protocol_.sum_2_lower = GETBITS8(sectionsum, K_LOW_NIBBLE, K_NIBBLE_SIZE);
-  sectionsum = this->calc_section_checksum(protocol_.raw + K_SAMSUNG_AC_SECTION_LENGTH * 2);
+  sectionsum = calc_section_checksum(protocol_.raw + K_SAMSUNG_AC_SECTION_LENGTH * 2);
   protocol_.sum_3_upper = GETBITS8(sectionsum, K_HIGH_NIBBLE, K_NIBBLE_SIZE);
   protocol_.sum_3_lower = GETBITS8(sectionsum, K_LOW_NIBBLE, K_NIBBLE_SIZE);
 }
