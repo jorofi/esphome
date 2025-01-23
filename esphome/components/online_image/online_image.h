@@ -1,10 +1,10 @@
 #pragma once
 
+#include "esphome/components/http_request/http_request.h"
+#include "esphome/components/image/image.h"
 #include "esphome/core/component.h"
 #include "esphome/core/defines.h"
 #include "esphome/core/helpers.h"
-#include "esphome/components/http_request/http_request.h"
-#include "esphome/components/image/image.h"
 
 #include "image_decoder.h"
 
@@ -27,6 +27,8 @@ enum ImageFormat {
   JPEG,
   /** PNG format. */
   PNG,
+  /** BMP format. */
+  BMP,
 };
 
 /**
@@ -83,8 +85,7 @@ class OnlineImage : public PollingComponent,
  protected:
   bool validate_url_(const std::string &url);
 
-  using Allocator = ExternalRAMAllocator<uint8_t>;
-  Allocator allocator_{Allocator::Flags::ALLOW_FAILURE};
+  RAMAllocator<uint8_t> allocator_{};
 
   uint32_t get_buffer_size_() const { return get_buffer_size_(this->buffer_width_, this->buffer_height_); }
   int get_buffer_size_(int width, int height) const { return (this->get_bpp() * width + 7u) / 8u * height; }
@@ -147,7 +148,7 @@ class OnlineImage : public PollingComponent,
    */
   int buffer_height_;
 
-  friend void ImageDecoder::set_size(int width, int height);
+  friend bool ImageDecoder::set_size(int width, int height);
   friend void ImageDecoder::draw(int x, int y, int w, int h, const Color &color);
 };
 
