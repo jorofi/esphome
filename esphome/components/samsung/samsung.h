@@ -187,21 +187,34 @@ class SamsungClimate : public climate_ir::ClimateIR {
   /// Transmit via IR the state of this climate controller
   void transmit_state() override;
 
+  /// Handle received IR Buffer
+  bool on_receive(remote_base::RemoteReceiveData data) override;
+
   /// Send the current state of the climate object.
   void send_();
   /// Change the AC power state.
   /// @param[in] on true, the AC is on. false, the AC is off.
   void send_power_state_(bool on);
   /// Set the swing setting of the A/C.
-  void set_swing_(climate::ClimateSwingMode swing_mode);
+  void set_swing_mode_(climate::ClimateSwingMode swing_mode);
+  /// Update the swing setting of the A/C.
+  void update_swing_mode_();
   /// Set the operating mode of the A/C.
   /// @param[in] climate_mode The desired operating mode.
-  void set_mode_(climate::ClimateMode climate_mode);
+  void set_climate_mode_(climate::ClimateMode climate_mode);
+  /// Update the operating mode of the A/C.
+  void update_climate_mode_();
   /// Set the temperature.
   /// @param[in] temp The temperature in degrees celsius.
   void set_temp_(uint8_t temp);
+  /// Update the temperature.
+  void update_temp_();
   /// Set the fan speed.
   void set_fan_(climate::ClimateFanMode fan_mode);
+  /// Update the fan speed.
+  void update_fan_();
+  /// Update the power state.
+  void update_power_();
   /// Update the checksum_ for the internal state.
   void checksum_();
   /// Calculate the checksum_ for a given state section.

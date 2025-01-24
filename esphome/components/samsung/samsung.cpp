@@ -4,6 +4,8 @@
 namespace esphome {
 namespace samsung {
 
+static const char *const TAG = "samsung.climate";
+
 void SamsungClimate::transmit_state() {
   if (current_climate_mode_ != climate::ClimateMode::CLIMATE_MODE_OFF &&
       this->mode == climate::ClimateMode::CLIMATE_MODE_OFF) {
@@ -18,12 +20,65 @@ void SamsungClimate::transmit_state() {
 
   current_climate_mode_ = this->mode;
 
-  this->set_mode_(this->mode);
+  this->set_climate_mode_(this->mode);
   this->set_temp_(this->target_temperature);
-  this->set_swing_(this->swing_mode);
+  this->set_swing_mode_(this->swing_mode);
   this->set_fan_(this->fan_mode.has_value() ? this->fan_mode.value() : climate::CLIMATE_FAN_AUTO);
 
   this->send_();
+}
+
+bool SamsungClimate::on_receive(remote_base::RemoteReceiveData data) {
+  if (!data.expect_item(SAMSUNG_AIRCON1_HDR_MARK, SAMSUNG_AIRCON1_HDR_SPACE)) {
+    return false;
+  }
+
+  ESP_LOGD(TAG, "Received Samsung A/C message");
+  for (uint8_t i = 0; i < 14; i++) {
+    if (i == 7) {
+      if (data.expect_item(SAMSUNG_AIRCON1_BIT_MARK, SAMSUNG_AIRCON1_MSG_SPACE)) {
+        ESP_LOGD(TAG, "Received MSG_SPACE %d", i);
+      } else {
+        ESP_LOGD(TAG, "Failed to receive MSG_SPACE %d", i);
+      }
+
+      if (data.expect_item(SAMSUNG_AIRCON1_HDR_MARK, SAMSUNG_AIRCON1_HDR_SPACE)) {
+        ESP_LOGD(TAG, "Received HDR_SPACE %d", i);
+      } else {
+        ESP_LOGD(TAG, "Failed to receive HDR_SPACE %d", i);
+      }
+    }
+
+    for (uint8_t y = 0; y < 8; y++) {
+      if (data.expect_item(SAMSUNG_AIRCON1_BIT_MARK, SAMSUNG_AIRCON1_ONE_SPACE)) {
+        protocol_.raw[i] |= 1 << y;
+      } else if (data.expect_item(SAMSUNG_AIRCON1_BIT_MARK, SAMSUNG_AIRCON1_ZERO_SPACE)) {
+        protocol_.raw[i] &= ~(1 << y);
+      } else {
+        ESP_LOGD(TAG, "Failed to receive bit %d, %d", i, y);
+      }
+    }
+  }
+
+  ESP_LOGD(TAG, "update_swing_mode_");
+  this->update_swing_mode_();
+
+  ESP_LOGD(TAG, "update_climate_mode_");
+  this->update_climate_mode_();
+
+  ESP_LOGD(TAG, "update_temp_");
+  this->update_temp_();
+
+  ESP_LOGD(TAG, "update_fan_");
+  this->update_fan_();
+
+  ESP_LOGD(TAG, "update_power_");
+  this->update_power_();
+
+  ESP_LOGD(TAG, "publish_state");
+  this->publish_state();
+
+  return true;
 }
 
 void SamsungClimate::send_() {
@@ -39,15 +94,15 @@ void SamsungClimate::send_() {
   // Header
   data->item(SAMSUNG_AIRCON1_HDR_MARK, SAMSUNG_AIRCON1_HDR_SPACE);
 
-  for (int i = 0; i < 21; i++) {
+  for (uint8_t i = 0; i < 21; i++) {
     if (i == 7 || i == 14) {
-      data->item(SAMSUNG_AIRCON1_BIT_MARK, SAMSUNG_AIRCON1_ONE_SPACE);
+      data->item(SAMSUNG_AIRCON1_BIT_MARK, SAMSUNG_AIRCON1_MSG_SPACE);
       data->item(SAMSUNG_AIRCON1_HDR_MARK, SAMSUNG_AIRCON1_HDR_SPACE);
     }
 
     uint8_t send_byte = protocol_.raw[i];
 
-    for (int y = 0; y < 8; y++) {
+    for (uint8_t y = 0; y < 8; y++) {
       if (send_byte & 0x01) {
         data->item(SAMSUNG_AIRCON1_BIT_MARK, SAMSUNG_AIRCON1_ONE_SPACE);
       } else {
@@ -63,7 +118,7 @@ void SamsungClimate::send_() {
   transmit.perform();
 }
 
-void SamsungClimate::set_swing_(const climate::ClimateSwingMode swing_mode) {
+void SamsungClimate::set_swing_mode_(const climate::ClimateSwingMode swing_mode) {
   switch (swing_mode) {
     case climate::ClimateSwingMode::CLIMATE_SWING_BOTH:
       protocol_.swing = K_SAMSUNG_AC_SWING_BOTH;
@@ -81,7 +136,25 @@ void SamsungClimate::set_swing_(const climate::ClimateSwingMode swing_mode) {
   }
 }
 
-void SamsungClimate::set_mode_(const climate::ClimateMode climate_mode) {
+void SamsungClimate::update_swing_mode_() {
+  switch (protocol_.swing) {
+    case K_SAMSUNG_AC_SWING_BOTH:
+      this->swing_mode = climate::ClimateSwingMode::CLIMATE_SWING_BOTH;
+      break;
+    case K_SAMSUNG_AC_SWING_H:
+      this->swing_mode = climate::ClimateSwingMode::CLIMATE_SWING_HORIZONTAL;
+      break;
+    case K_SAMSUNG_AC_SWING_V:
+      this->swing_mode = climate::ClimateSwingMode::CLIMATE_SWING_VERTICAL;
+      break;
+    case K_SAMSUNG_AC_SWING_OFF:
+    default:
+      this->swing_mode = climate::ClimateSwingMode::CLIMATE_SWING_OFF;
+      break;
+  }
+}
+
+void SamsungClimate::set_climate_mode_(const climate::ClimateMode climate_mode) {
   switch (climate_mode) {
     case climate::ClimateMode::CLIMATE_MODE_HEAT:
       protocol_.mode = K_SAMSUNG_AC_HEAT;
@@ -103,9 +176,32 @@ void SamsungClimate::set_mode_(const climate::ClimateMode climate_mode) {
   }
 }
 
+void SamsungClimate::update_climate_mode_() {
+  switch (protocol_.mode) {
+    case K_SAMSUNG_AC_HEAT:
+      this->mode = climate::ClimateMode::CLIMATE_MODE_HEAT;
+      break;
+    case K_SAMSUNG_AC_DRY:
+      this->mode = climate::ClimateMode::CLIMATE_MODE_DRY;
+      break;
+    case K_SAMSUNG_AC_COOL:
+      this->mode = climate::ClimateMode::CLIMATE_MODE_COOL;
+      break;
+    case K_SAMSUNG_AC_FAN:
+      this->mode = climate::ClimateMode::CLIMATE_MODE_FAN_ONLY;
+      break;
+    case K_SAMSUNG_AC_AUTO:
+    default:
+      this->mode = climate::ClimateMode::CLIMATE_MODE_AUTO;
+      break;
+  }
+}
+
 void SamsungClimate::set_temp_(const uint8_t temp) {
   protocol_.temp = esphome::clamp<uint8_t>(temp, K_SAMSUNG_AC_MIN_TEMP, K_SAMSUNG_AC_MAX_TEMP);
 }
+
+void SamsungClimate::update_temp_() { this->target_temperature = protocol_.temp + K_SAMSUNG_AC_MIN_TEMP; }
 
 void SamsungClimate::send_power_state_(const bool on) {
   static const uint8_t K_ON[K_SAMSUNG_AC_EXTENDED_STATE_LENGTH] = {0x02, 0x92, 0x0F, 0x00, 0x00, 0x00, 0xF0,
@@ -138,6 +234,31 @@ void SamsungClimate::set_fan_(const climate::ClimateFanMode fan_mode) {
     default:
       protocol_.fan = K_SAMSUNG_AC_FAN_AUTO;
       break;
+  }
+}
+
+void SamsungClimate::update_fan_() {
+  switch (protocol_.fan) {
+    case K_SAMSUNG_AC_FAN_LOW:
+      this->fan_mode = climate::ClimateFanMode::CLIMATE_FAN_LOW;
+      break;
+    case K_SAMSUNG_AC_FAN_MED:
+      this->fan_mode = climate::ClimateFanMode::CLIMATE_FAN_MEDIUM;
+      break;
+    case K_SAMSUNG_AC_FAN_HIGH:
+      this->fan_mode = climate::ClimateFanMode::CLIMATE_FAN_HIGH;
+      break;
+    case K_SAMSUNG_AC_FAN_AUTO:
+    default:
+      this->fan_mode = climate::ClimateFanMode::CLIMATE_FAN_AUTO;
+      break;
+  }
+}
+
+void SamsungClimate::update_power_() {
+  ESP_LOGD(TAG, "power_1: 0x%02X, power_2: 0x%02X", protocol_.power_1, protocol_.power_2);
+  if (protocol_.power_1 != 0x03) {
+    this->mode = climate::ClimateMode::CLIMATE_MODE_OFF;
   }
 }
 
