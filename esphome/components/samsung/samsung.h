@@ -196,7 +196,7 @@ class SamsungClimate : public climate_ir::ClimateIR {
   /// @param[in] on true, the AC is on. false, the AC is off.
   void send_power_state_(bool on);
   /// Check if the AC is off.
-  bool is_power_off();
+  bool is_power_off_();
   /// Set the swing setting of the A/C.
   void set_swing_mode_(climate::ClimateSwingMode swing_mode);
   /// Update the swing setting of the A/C.

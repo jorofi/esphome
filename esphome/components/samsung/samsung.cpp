@@ -64,7 +64,7 @@ bool SamsungClimate::on_receive(remote_base::RemoteReceiveData data) {
     }
   }
 
-  if (this->is_power_off()) {
+  if (this->is_power_off_()) {
     this->last_known_mode_ = this->mode;
     this->mode = climate::ClimateMode::CLIMATE_MODE_OFF;
     this->current_climate_mode_ = this->mode;
@@ -235,7 +235,7 @@ void SamsungClimate::send_power_state_(const bool on) {
   std::memcpy(this->protocol_.raw, K_RESET, K_SAMSUNG_AC_EXTENDED_STATE_LENGTH);
 }
 
-bool SamsungClimate::is_power_off() { return this->protocol_.power_1 == 0; }
+bool SamsungClimate::is_power_off_() { return this->protocol_.power_1 == 0; }
 
 void SamsungClimate::set_fan_(const climate::ClimateFanMode fan_mode) {
   switch (fan_mode) {
