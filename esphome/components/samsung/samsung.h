@@ -172,7 +172,6 @@ union SamsungProtocol {
 };
 
 class SamsungClimate : public climate_ir::ClimateIR {
-
  public:
   SamsungClimate()
       : climate_ir::ClimateIR(K_SAMSUNG_AC_MIN_TEMP, K_SAMSUNG_AC_MAX_TEMP, 1.0f, true, true,
