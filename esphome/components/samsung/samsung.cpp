@@ -44,12 +44,14 @@ bool SamsungClimate::on_receive(remote_base::RemoteReceiveData data) {
         ESP_LOGV(TAG, "Received MSG_SPACE %" PRIu8, i);
       } else {
         ESP_LOGW(TAG, "Failed to receive MSG_SPACE %" PRIu8, i);
+        return false;
       }
 
       if (data.expect_item(SAMSUNG_AIRCON1_HDR_MARK, SAMSUNG_AIRCON1_HDR_SPACE)) {
         ESP_LOGV(TAG, "Received HDR_SPACE %" PRIu8, i);
       } else {
         ESP_LOGW(TAG, "Failed to receive HDR_SPACE %" PRIu8, i);
+        return false;
       }
     }
 
@@ -60,6 +62,7 @@ bool SamsungClimate::on_receive(remote_base::RemoteReceiveData data) {
         protocol_.raw[i] &= ~(1 << y);
       } else {
         ESP_LOGW(TAG, "Failed to receive bit %" PRIu8 " in byte %" PRIu8, y, i);
+        return false;
       }
     }
   }
