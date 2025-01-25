@@ -172,8 +172,6 @@ union SamsungProtocol {
 };
 
 class SamsungClimate : public climate_ir::ClimateIR {
-  SamsungProtocol protocol_;
-  climate::ClimateMode current_climate_mode_;
 
  public:
   SamsungClimate()
@@ -184,9 +182,11 @@ class SamsungClimate : public climate_ir::ClimateIR {
                                climate::CLIMATE_SWING_HORIZONTAL, climate::CLIMATE_SWING_BOTH}) {}
 
  protected:
+  SamsungProtocol protocol_;
+  climate::ClimateMode current_climate_mode_;
+
   /// Transmit via IR the state of this climate controller
   void transmit_state() override;
-
   /// Handle received IR Buffer
   bool on_receive(remote_base::RemoteReceiveData data) override;
 

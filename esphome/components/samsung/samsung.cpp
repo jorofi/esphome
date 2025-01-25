@@ -7,18 +7,18 @@ namespace samsung {
 static const char *const TAG = "samsung.climate";
 
 void SamsungClimate::transmit_state() {
-  if (current_climate_mode_ != climate::ClimateMode::CLIMATE_MODE_OFF &&
+  if (this->current_climate_mode_ != climate::ClimateMode::CLIMATE_MODE_OFF &&
       this->mode == climate::ClimateMode::CLIMATE_MODE_OFF) {
     this->send_power_state_(false);
     return;
   }
 
-  if (current_climate_mode_ == climate::ClimateMode::CLIMATE_MODE_OFF &&
+  if (this->current_climate_mode_ == climate::ClimateMode::CLIMATE_MODE_OFF &&
       this->mode != climate::ClimateMode::CLIMATE_MODE_OFF) {
     this->send_power_state_(true);
   }
 
-  current_climate_mode_ = this->mode;
+  this->current_climate_mode_ = this->mode;
 
   this->set_climate_mode_(this->mode);
   this->set_temp_(this->target_temperature);
@@ -277,15 +277,15 @@ uint8_t SamsungClimate::calc_section_checksum(const uint8_t *section) {
 }
 
 void SamsungClimate::checksum_() {
-  uint8_t sectionsum = calc_section_checksum(protocol_.raw);
-  protocol_.sum_1_upper = GETBITS8(sectionsum, K_HIGH_NIBBLE, K_NIBBLE_SIZE);
-  protocol_.sum_1_lower = GETBITS8(sectionsum, K_LOW_NIBBLE, K_NIBBLE_SIZE);
-  sectionsum = calc_section_checksum(protocol_.raw + K_SAMSUNG_AC_SECTION_LENGTH);
-  protocol_.sum_2_upper = GETBITS8(sectionsum, K_HIGH_NIBBLE, K_NIBBLE_SIZE);
-  protocol_.sum_2_lower = GETBITS8(sectionsum, K_LOW_NIBBLE, K_NIBBLE_SIZE);
-  sectionsum = calc_section_checksum(protocol_.raw + K_SAMSUNG_AC_SECTION_LENGTH * 2);
-  protocol_.sum_3_upper = GETBITS8(sectionsum, K_HIGH_NIBBLE, K_NIBBLE_SIZE);
-  protocol_.sum_3_lower = GETBITS8(sectionsum, K_LOW_NIBBLE, K_NIBBLE_SIZE);
+  uint8_t sectionsum = calc_section_checksum(this->protocol_.raw);
+  this->protocol_.sum_1_upper = GETBITS8(sectionsum, K_HIGH_NIBBLE, K_NIBBLE_SIZE);
+  this->protocol_.sum_1_lower = GETBITS8(sectionsum, K_LOW_NIBBLE, K_NIBBLE_SIZE);
+  sectionsum = calc_section_checksum(this->protocol_.raw + K_SAMSUNG_AC_SECTION_LENGTH);
+  this->protocol_.sum_2_upper = GETBITS8(sectionsum, K_HIGH_NIBBLE, K_NIBBLE_SIZE);
+  this->protocol_.sum_2_lower = GETBITS8(sectionsum, K_LOW_NIBBLE, K_NIBBLE_SIZE);
+  sectionsum = calc_section_checksum(this->protocol_.raw + K_SAMSUNG_AC_SECTION_LENGTH * 2);
+  this->protocol_.sum_3_upper = GETBITS8(sectionsum, K_HIGH_NIBBLE, K_NIBBLE_SIZE);
+  this->protocol_.sum_3_lower = GETBITS8(sectionsum, K_LOW_NIBBLE, K_NIBBLE_SIZE);
 }
 
 uint16_t SamsungClimate::count_bits(const uint8_t *const start, const uint16_t length, const bool ones,
