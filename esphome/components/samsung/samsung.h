@@ -183,6 +183,7 @@ class SamsungClimate : public climate_ir::ClimateIR {
  protected:
   SamsungProtocol protocol_;
   climate::ClimateMode current_climate_mode_;
+  climate::ClimateMode last_known_mode_;
 
   /// Transmit via IR the state of this climate controller
   void transmit_state() override;
@@ -194,6 +195,8 @@ class SamsungClimate : public climate_ir::ClimateIR {
   /// Change the AC power state.
   /// @param[in] on true, the AC is on. false, the AC is off.
   void send_power_state_(bool on);
+  /// Check if the AC is off.
+  bool is_power_off();
   /// Set the swing setting of the A/C.
   void set_swing_mode_(climate::ClimateSwingMode swing_mode);
   /// Update the swing setting of the A/C.
@@ -212,8 +215,6 @@ class SamsungClimate : public climate_ir::ClimateIR {
   void set_fan_(climate::ClimateFanMode fan_mode);
   /// Update the fan speed.
   void update_fan_();
-  /// Update the power state.
-  void update_power_();
   /// Update the checksum_ for the internal state.
   void checksum_();
   /// Calculate the checksum_ for a given state section.
