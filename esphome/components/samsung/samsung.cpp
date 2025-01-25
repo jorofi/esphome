@@ -68,30 +68,19 @@ bool SamsungClimate::on_receive(remote_base::RemoteReceiveData data) {
     this->last_known_mode_ = this->mode;
     this->mode = climate::ClimateMode::CLIMATE_MODE_OFF;
     this->current_climate_mode_ = this->mode;
-
-    ESP_LOGD(TAG, "Reception successful, power is off, publishing new state.");
-    this->publish_state();
-    return true;
-  }
-
-  if (this->last_known_mode_ != climate::ClimateMode::CLIMATE_MODE_OFF) {
+  } else if (this->last_known_mode_ != climate::ClimateMode::CLIMATE_MODE_OFF) {
     this->mode = this->last_known_mode_;
     this->current_climate_mode_ = this->mode;
     this->last_known_mode_ = climate::ClimateMode::CLIMATE_MODE_OFF;
-
-    ESP_LOGD(TAG, "Reception successful, power is on, publishing new state.");
-    this->publish_state();
-    return true;
+  } else {
+    this->update_climate_mode_();
+    this->update_swing_mode_();
+    this->update_temp_();
+    this->update_fan_();
   }
 
-  this->update_climate_mode_();
-  this->update_swing_mode_();
-  this->update_temp_();
-  this->update_fan_();
-
-  ESP_LOGD(TAG, "Reception successful, publishing new state.");
+  ESP_LOGD(TAG, "Reception successful, power is %s, publishing new state.", ONOFF(!this->is_power_off_()));
   this->publish_state();
-
   return true;
 }
 
