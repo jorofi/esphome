@@ -15,11 +15,6 @@ void SamsungClimate::transmit_state() {
     return;
   }
 
-  if (this->current_climate_mode_ == climate::ClimateMode::CLIMATE_MODE_OFF &&
-      this->mode != climate::ClimateMode::CLIMATE_MODE_OFF) {
-    this->send_power_state_(true);
-  }
-
   std::memcpy(this->protocol_.raw, K_RESET, K_SAMSUNG_AC_EXTENDED_STATE_LENGTH);
 
   this->current_climate_mode_ = this->mode;
@@ -37,7 +32,7 @@ bool SamsungClimate::on_receive(remote_base::RemoteReceiveData data) {
     return false;
   }
 
-  ESP_LOGD(TAG, "Received Samsung A/C message");
+  ESP_LOGD(TAG, "Received Samsung A/C message size %" PRIu8, data.size());
   for (uint8_t i = 0; i < 14; i++) {
     if (i == 7) {
       if (data.expect_item(SAMSUNG_AIRCON1_BIT_MARK, SAMSUNG_AIRCON1_MSG_SPACE)) {
@@ -223,10 +218,6 @@ void SamsungClimate::send_power_state_(const bool on) {
   std::memcpy(this->protocol_.raw, on ? K_ON : K_OFF, K_SAMSUNG_AC_EXTENDED_STATE_LENGTH);
 
   this->send_();
-
-  if (on) {  // Give time for the AC receiver to process the ON command.
-    delay(1000);
-  }
 
   std::memcpy(this->protocol_.raw, K_RESET, K_SAMSUNG_AC_EXTENDED_STATE_LENGTH);
 }
