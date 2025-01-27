@@ -224,6 +224,10 @@ void SamsungClimate::send_power_state_(const bool on) {
 
   this->send_();
 
+  if (on) {  // Give time for the AC receiver to process the ON command.
+    delay(1000);
+  }
+
   std::memcpy(this->protocol_.raw, K_RESET, K_SAMSUNG_AC_EXTENDED_STATE_LENGTH);
 }
 
