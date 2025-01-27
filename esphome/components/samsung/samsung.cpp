@@ -32,7 +32,7 @@ bool SamsungClimate::on_receive(remote_base::RemoteReceiveData data) {
     return false;
   }
 
-  ESP_LOGD(TAG, "Received Samsung A/C message size %" PRIu8, data.size());
+  ESP_LOGD(TAG, "Received Samsung A/C message size %" PRId32, data.size());
   for (uint8_t i = 0; i < 14; i++) {
     if (i == 7) {
       if (data.expect_item(SAMSUNG_AIRCON1_BIT_MARK, SAMSUNG_AIRCON1_MSG_SPACE)) {
